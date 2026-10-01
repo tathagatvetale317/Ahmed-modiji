@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ahmed Modiji's Gaming Cafe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#15123a;--panel:#201c52;--ink:#f6f3ff;--mute:#b4aee0;--y:#ffd23f;--p:#ff4f9a;--ok:#3ddc97;--line:#3a3591;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="dark"]){}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f2ff;--panel:#fff;--ink:#1b1747;--mute:#5b5690;--line:#cfcaf5;--y:#c98a00}}
+:root[data-theme="light"]{--bg:#f4f2ff;--panel:#fff;--ink:#1b1747;--mute:#5b5690;--line:#cfcaf5;--y:#c98a00}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 Outfit,system-ui,sans-serif}
+h1,h2{font-family:Bungee,Impact,sans-serif;font-weight:400;line-height:1.05;margin:0}
+h1{font-size:clamp(34px,7vw,64px)}h2{font-size:clamp(24px,4vw,34px);margin-bottom:12px}
+main{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+header p{color:var(--mute);max-width:52ch;margin:12px 0 0}
+section{margin-top:40px}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.box{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:18px}
+.zone{margin-bottom:16px}.zone b{display:block;margin-bottom:8px}.zone small{color:var(--mute);font-weight:400}
+.seats{display:flex;flex-wrap:wrap;gap:8px}
+.seat{width:52px;height:46px;border-radius:8px 8px 4px 4px;border:2px solid var(--line);background:transparent;color:var(--ink);font:600 14px Outfit,sans-serif;cursor:pointer}
+.seat:hover{border-color:var(--y)}
+.seat.busy{background:repeating-linear-gradient(45deg,var(--line),var(--line) 4px,transparent 4px,transparent 8px);color:var(--mute);cursor:not-allowed;border-style:dashed}
+.seat.sel{background:var(--p);border-color:var(--p);color:#fff}
+.seat:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+.legend{display:flex;gap:16px;color:var(--mute);font-size:14px;margin-top:6px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input,select{width:100%;padding:10px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 4px;font-size:15px;color:var(--mute)}
+.total strong{font:400 32px Bungee,sans-serif;color:var(--y)}
+button.go{width:100%;margin-top:10px;padding:13px;border:0;border-radius:10px;background:var(--y);color:#15123a;font:400 18px Bungee,sans-serif;cursor:pointer}
+button.go:disabled{opacity:.45;cursor:not-allowed}
+#msg{margin-top:12px;min-height:24px;color:var(--ok);font-weight:600}#msg.err{color:var(--p)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:600}
+.games{display:flex;flex-wrap:wrap;gap:8px}.games span{border:2px solid var(--line);border-radius:999px;padding:5px 14px}
+.scroll{overflow-x:auto}footer{margin-top:40px;color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Ahmed Modiji's<br>Gaming Cafe</h1>
+  <p>Pick your seat, choose your hours, and walk in ready to play. High-refresh PCs, PS5 and racing rigs.</p>
+</header>
+
+<section class="grid" aria-label="Seat booking">
+  <div class="box">
+    <h2>Pick a seat</h2>
+    <div id="zones"></div>
+    <div class="legend"><span>Open</span><span>Taken (striped)</span><span style="color:var(--p)">Your pick</span></div>
+  </div>
+  <div class="box">
+    <h2>Your session</h2>
+    <label for="name">Your name</label><input id="name" autocomplete="name">
+    <label for="hours">Hours</label>
+    <select id="hours"></select>
+    <label for="time">Start time</label><input id="time" type="time" value="18:00">
+    <div class="total"><span id="sum">No seat picked</span><strong id="price">₹0</strong></div>
+    <button class="go" id="book">Book seat</button>
+    <div id="msg" role="status"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Rates per hour</h2>
+  <div class="box scroll"><table>
+    <tr><th>Zone</th><th>Gear</th><th>1 hr</th><th>3 hr pack</th></tr>
+    <tr><td>PC Arena</td><td>RTX PC, 165 Hz monitor</td><td>₹80</td><td>₹210</td></tr>
+    <tr><td>Console Lounge</td><td>PS5, 55" TV, sofa</td><td>₹120</td><td>₹330</td></tr>
+    <tr><td>Racing Rigs</td><td>Wheel, pedals, bucket seat</td><td>₹150</td><td>₹420</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>On the machines</h2>
+  <div class="games"><span>Valorant</span><span>CS2</span><span>GTA V</span><span>FC 26</span><span>Tekken 8</span><span>Forza</span><span>Fortnite</span><span>BGMI (emulator)</span></div>
+</section>
+
+<footer>Demo page: bookings stay in this browser tab and seat status is sample data. Rates, games and hours are placeholders to replace with the cafe's real details.</footer>
+</main>
+
+<script>
+const zones=[
+ {id:"PC",name:"PC Arena",note:"₹80/hr",rate:[80,210],n:12,taken:[2,3,7]},
+ {id:"PS",name:"Console Lounge",note:"₹120/hr",rate:[120,330],n:6,taken:[1,4]},
+ {id:"RR",name:"Racing Rigs",note:"₹150/hr",rate:[150,420],n:3,taken:[2]}
+];
+let sel=null;const taken=new Set();
+const $=id=>document.getElementById(id);
+const hrs=$("hours");
+for(let h=1;h<=6;h++){const o=document.createElement("option");o.value=h;o.textContent=h+(h==1?" hour":" hours");hrs.appendChild(o)}
+zones.forEach(z=>z.taken.forEach(i=>taken.add(z.id+i)));
+const zWrap=$("zones");
+zones.forEach(z=>{
+  const d=document.createElement("div");d.className="zone";
+  d.innerHTML=`<b>${z.name} <small>${z.note}</small></b><div class="seats"></div>`;
+  const s=d.querySelector(".seats");
+  for(let i=1;i<=z.n;i++){
+    const b=document.createElement("button");b.type="button";b.className="seat";b.textContent=z.id+i;b.dataset.k=z.id+i;
+    if(taken.has(z.id+i)){b.classList.add("busy");b.disabled=true;b.setAttribute("aria-label",b.textContent+" taken")}
+    else b.onclick=()=>{sel={k:z.id+i,z};render()};
+    s.appendChild(b);
+  }
+  zWrap.appendChild(d);
+});
+function cost(){
+  if(!sel)return 0;const h=+hrs.value,[one,three]=sel.z.rate;
+  return Math.floor(h/3)*three+(h%3)*one;
+}
+function render(){
+  document.querySelectorAll(".seat").forEach(b=>b.classList.toggle("sel",!!sel&&b.dataset.k===sel.k));
+  $("sum").textContent=sel?`${sel.k} for ${hrs.value} hr`:"No seat picked";
+  $("price").textContent="₹"+cost();
+}
+hrs.onchange=render;
+$("book").onclick=()=>{
+  const m=$("msg");m.className="";
+  if(!sel){m.textContent="Pick an open seat first.";m.className="err";return}
+  const n=$("name").value.trim();
+  if(!n){m.textContent="Enter your name to book.";m.className="err";return}
+  const b=document.querySelector(`[data-k="${sel.k}"]`);
+  b.classList.remove("sel");b.classList.add("busy");b.disabled=true;
+  m.textContent=`Booked: ${n}, seat ${sel.k}, ${hrs.value} hr from ${$("time").value}. Pay ₹${cost()} at the counter.`;
+  sel=null;render();
+};
+render();
+</script>
+</body>
+</html>
